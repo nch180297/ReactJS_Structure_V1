@@ -2,6 +2,8 @@ import React, { Suspense, Fragment, lazy } from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 
 import LoadingScreen from 'src/components/LoadingScreen';
+import AuthGuard from 'src/components/AuthGuard';
+import GuestGuard from 'src/components/GuestGuard';
 
 import MainLayout from 'src/layouts/MainLayout';
 
@@ -41,7 +43,14 @@ const routes = [
     component: lazy(() => import('src/views/Errors/NotFoundView'))
   },
   {
+    exact: true,
+    guard: GuestGuard,
+    path: ROUTER_NAME.LOGIN,
+    component: lazy(() => import('src/views/Login'))
+  },
+  {
     path: ROUTER_NAME.ALL,
+    guard: AuthGuard,
     layout: MainLayout,
     routes: [
       {

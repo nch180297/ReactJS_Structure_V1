@@ -3,19 +3,43 @@ import React, { createContext, useEffect, useReducer } from 'react';
 import SplashScreen from 'src/components/SplashScreen';
 
 const ACTION_TYPE = {
-  INITIALISE: 'INITIALISE'
+  INITIALISE: 'INITIALISE',
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT',
 };
 
 const initialAuthState = {
-  isInitialised: false
+  isAuthenticated: false,
+  isInitialised: false,
+  user: null
 };
 
 const reducer = (state, action) => {
   switch (action.type) {
     case ACTION_TYPE.INITIALISE: {
+      const { isAuthenticated, user } = action.payload;
+
       return {
         ...state,
-        isInitialised: true
+        isAuthenticated,
+        isInitialised: true,
+        user
+      };
+    }
+    case ACTION_TYPE.LOGIN: {
+      const { user } = action.payload;
+
+      return {
+        ...state,
+        isAuthenticated: true,
+        user
+      };
+    }
+    case ACTION_TYPE.LOGOUT: {
+      return {
+        ...state,
+        isAuthenticated: false,
+        user: null
       };
     }
     default: {
@@ -25,15 +49,35 @@ const reducer = (state, action) => {
 };
 
 const AuthContext = createContext({
-  ...initialAuthState
+  ...initialAuthState,
+  login: () => { },
+  logout: () => { },
 });
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialAuthState);
 
+  const login = (data) => {
+    dispatch({
+      type: ACTION_TYPE.LOGIN,
+      payload: {
+        user: data
+      }
+    });
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    dispatch({ type: ACTION_TYPE.LOGOUT });
+  };
+
   useEffect(() => {
     dispatch({
-      type: ACTION_TYPE.INITIALISE
+      type: ACTION_TYPE.INITIALISE,
+      payload: {
+        isAuthenticated: false,
+        user: null
+      }
     });
   }, []);
 
@@ -44,7 +88,9 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
-        ...state
+        ...state,
+        login,
+        logout,
       }}
     >
       {children}
